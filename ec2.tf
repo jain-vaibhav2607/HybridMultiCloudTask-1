@@ -1,4 +1,5 @@
 provider "aws" {
+  profile    = "myvaibhav"
   region     = "ap-south-1"
 }
 
