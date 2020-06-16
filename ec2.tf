@@ -3,13 +3,9 @@ provider "aws" {
   region     = "ap-south-1"
 }
 
-
 resource "tls_private_key" "myprivatekey" {
   algorithm   = "RSA"
 }
-
-
-
 
 resource "aws_key_pair" "mykey" {
   key_name   = "myterakey"
@@ -22,31 +18,27 @@ resource "aws_security_group" "mysecgroup" {
   name        = "terasecuritygroup"
   description = "Allow TLS inbound traffic"
   vpc_id      = "vpc-ad6a75c5"
-
-  ingress {
+ingress {
     description = "TLS from VPC"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-
+}
 ingress {
     description = "HTTP from VPC"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
+ }
+ egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-tags = {
+ tags = {
     Name = "terasecuritygroup"
   }
 }
@@ -64,14 +56,12 @@ resource  "aws_instance"   "myowninstance" {
   tags = {
     Name = "Vaibhavfirstos"
   }
-
   connection {
     type     = "ssh"
     user     = "ec2-user"
     private_key = "${tls_private_key.myprivatekey.private_key_pem}"
     host     = "${aws_instance.myowninstance.public_ip}"
   }
-
   provisioner "remote-exec" {
     inline = [
       "sudo yum install httpd php  git -y",
@@ -80,8 +70,6 @@ resource  "aws_instance"   "myowninstance" {
     ]
   }
 }
-
-
 
 resource "aws_ebs_volume"  "myebsvolume" {
   availability_zone = "${aws_instance.myowninstance.availability_zone}"
@@ -175,7 +163,6 @@ depends_on = [
 locals {
   s3_origin_id = "S3-${aws_s3_bucket.mys3bucket.bucket}"
 }
-
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
     domain_name = "${aws_s3_bucket.mys3bucket.bucket_regional_domain_name}"
@@ -183,9 +170,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   }
 
   enabled             = true
-
-
-
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
@@ -193,29 +177,24 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
     forwarded_values {
       query_string = false
-
       cookies {
         forward = "none"
       }
     }
-
     viewer_protocol_policy = "allow-all"
     min_ttl                = 0
     default_ttl            = 3600
     max_ttl                = 86400
  }
 
-
-    restrictions {
-       geo_restriction {
-          restriction_type = "none"
-       }
+ restrictions {
+    geo_restriction {
+       restriction_type = "none"
     }
-
-
-viewer_certificate {
-    cloudfront_default_certificate = true
-  }
+ }
+ viewer_certificate {
+   cloudfront_default_certificate = true
+ }
 
   connection {
     type     = "ssh"
@@ -223,8 +202,6 @@ viewer_certificate {
     private_key = "${tls_private_key.myprivatekey.private_key_pem}"
     host     = "${aws_instance.myowninstance.public_ip}"
   }
-
-
 
     provisioner "remote-exec" {
     inline = [
@@ -235,10 +212,6 @@ viewer_certificate {
   }
     
 }
-
-
-
-
 
 resource "null_resource" "nulllocalresource2" {
 
